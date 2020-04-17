@@ -67,3 +67,4 @@ var d = new HashTable(10);
 d.insert('a', 'b');
 d.insert('c', 'd');
 console.log(d);
+console.log("Hello");
