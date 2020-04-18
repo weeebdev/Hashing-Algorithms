@@ -1,4 +1,4 @@
-class HashTable {
+class HashTableO {
     private data = null;
     private capacity = 0;
     private g = 31;
@@ -9,7 +9,7 @@ class HashTable {
         this.data = new Array(this.capacity)
     }
 
-    private hash(data) {
+    private hash(data): number {
         data = data.toString();
         let hash = 0;
         for (let i = 0; i < data.length; i++) {
@@ -63,7 +63,7 @@ class HashTable {
     }
 }
 
-var d = new HashTable(10);
+var d = new HashTableO(10);
 d.insert('a', 'b');
 d.insert('c', 'd');
 d.insert('d', 'd');
