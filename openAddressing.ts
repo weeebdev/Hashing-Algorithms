@@ -66,5 +66,5 @@ class HashTable {
 var d = new HashTable(10);
 d.insert('a', 'b');
 d.insert('c', 'd');
+d.insert('d', 'd');
 console.log(d);
-console.log("Hello");
