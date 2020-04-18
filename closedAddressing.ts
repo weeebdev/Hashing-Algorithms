@@ -149,5 +149,5 @@ h.remove(1);
 // h.add('Akzhan', 'Akhmetova');
 // h.add('Akzhan', 'Bairamov');
 // h.add('31', 'Bairamov');
-// h.remove('Akzhan');
+h.remove('Akzhan');
 print(h.tableSize);
