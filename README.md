@@ -117,3 +117,22 @@ Best case: $O(1)$
 
 ## Rehashing ##
 The problem is that we can't just copy nodes from old array to the new one. THUS, we have to rehash all the elements.
+
+## Bloom Filters ##
+Bloom filters - is data structure which is used to check the set membership. 
+ - Definitely not in the set
+ - Probably in the set
+ - But it can't guarantee that object is definitely in the set
+ - Items cannot be deleted from a bloom filter. EVER  
+Hash all the objects and store them in the array where the index of the element is his hash.  
+The chance to have a collision is low in the MD5 hash. But that's not the case. Let's use several hash functions. If there is 0 in any of the location, then the object was never entered into the filter.
+$$n = \text{number of items we're planning to put in the filter}$$
+$$p = \text{probability of a collision we're willing to accept}$$
+$$m = \frac{n*ln(p)}{ln(2)^2} \text{ - optimal size of array to use in a bloom filter}$$
+$$k = \frac{m}{n}ln(2) \text{ - optimal number of hash functions to use}$$
+
+## Cuckoo hashing ##
+Let's combine Bloom filters and hashing into the Cuckoo hashing!  
+We have to hash initial value twice. If the 1st location is empty we place the value there, otherwise we put it in the second spot. If both locations are full, we place the value in the first location, bumping the existing value.  
+Actually, you may see it more deeply here  
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HRzg0SzFLQQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

@@ -4,6 +4,9 @@ interface HashI<K, V> {
     numElements: number;
     tableSize: number;
     maxLoadFactor: number;
+    add(key: K, value: V): boolean;
+    remove(key: K): void;
+    getValue(key: K): V;
 }
 
 class Comparable<T> {
@@ -28,7 +31,7 @@ class HashElement<K, V> implements Comparable<HashElement<K, V>>{
         return this.key.toString().localeCompare(o.toString()) === 0 ? 0 : 1;
     }
 
-    public toString(): string {
+    toString(): string {
         var str: string = `${this.key.toString()}: ${this.value.toString()}`;
         return str;
     }
@@ -82,7 +85,7 @@ class HashTableC<K, V> implements HashI<K, V>{
         this.tableSize = newSize;
     }
 
-    public add(key: K, value: V): boolean {
+    add(key: K, value: V): boolean {
         if (this.loadFactor() > this.maxLoadFactor) {
             this.resize(this.tableSize * 2);
         }
@@ -99,7 +102,7 @@ class HashTableC<K, V> implements HashI<K, V>{
         return true;
     }
 
-    public remove(key: K) {
+    remove(key: K): void {
         var hashValue: number = (this.hashCode(key) & 0x7FFFFFFF) % this.tableSize;
 
         if (this.hArray[hashValue] !== undefined) {
@@ -112,7 +115,7 @@ class HashTableC<K, V> implements HashI<K, V>{
         }
     }
 
-    public getValue(key: K): V {
+    getValue(key: K): V {
         var hashValue: number = (this.hashCode(key) & 0x7FFFFFFF) % this.tableSize;
         var he: HashElement<K, V>;
         if (this.hArray[hashValue] !== undefined) {
@@ -125,7 +128,7 @@ class HashTableC<K, V> implements HashI<K, V>{
         return undefined;
     }
 
-    public toString(): string {
+    toString(): string {
         var str: string;
 
         str = `[${this.hArray.join(', ')}]`;
@@ -147,7 +150,5 @@ for (let i = 0; i < 100; i++) {
 h.remove(1);
 // h.add('Adil', 'Akhmetov');
 // h.add('Akzhan', 'Akhmetova');
-// h.add('Akzhan', 'Bairamov');
-// h.add('31', 'Bairamov');
 // h.remove('Akzhan');
 print(h.tableSize);
