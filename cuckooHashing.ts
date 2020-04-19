@@ -8,8 +8,8 @@ class CuckooHashing<K, V> implements HashI<K, V> {
     tableSize: number;
     maxLoadFactor: number;
     hArray: HashElement<K, V>[];
-    private h1(key: K): BigInt { return 0n; };
-    private h2(key: K): BigInt { return 0n; };
+    public h1(key: K): BigInt { return 0n; };
+    public h2(key: K): BigInt { return 0n; };
 
     // May be a problem with the same hash functions
     private rehash(h1?: (key: K) => BigInt, h2?: (key: K) => BigInt): void {
@@ -38,6 +38,7 @@ class CuckooHashing<K, V> implements HashI<K, V> {
         this.rehash(h1, h2);
         this.tableSize = size;
         this.maxLoadFactor = loadFactor;
+        this.hArray = new Array(this.tableSize);
     }
 
     private resize(newSize: number): void {
@@ -50,11 +51,7 @@ class CuckooHashing<K, V> implements HashI<K, V> {
             this.resize(this.tableSize * 2);
         }
         var hashValue1: number = this.hashValue(key, this.h1, this.tableSize);
-        console.log(hashValue1);
         let ne = new HashElement(key, value);
-        console.log(ne);
-        console.log(this.hArray);
-        console.log(this.hArray[hashValue1]);
         if (this.hArray[hashValue1] !== undefined) {
             var hashValue2: number = this.hashValue(key, this.h2, this.tableSize);
             if (this.hArray[hashValue2] !== undefined) {
@@ -78,6 +75,7 @@ class CuckooHashing<K, V> implements HashI<K, V> {
                         this.hArray[hashValue1] = prevNe; //base case
                         return true;
                     }
+                    ne = prevNe;
                 }
             } else {
                 this.hArray[hashValue2] = ne;
@@ -95,11 +93,15 @@ class CuckooHashing<K, V> implements HashI<K, V> {
         throw new Error("Method not implemented.");
     }
     toString(): string {
-        return this.hArray.toString();
+        return this.hArray.join(', ');
     }
 }
 
 
 var cH = new CuckooHashing(10);
-cH.add(1, 1);
+for (let i = 0; i < 10; i++) {
+    cH.add(i, i);
+}
 console.log(cH.toString());
+// console.log(cH.h1('Hello').toString());
+// console.log(cH.h2('Hello').toString());
