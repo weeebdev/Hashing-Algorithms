@@ -1,43 +1,7 @@
 import { LinkedList } from './LinkedList';
+import { HashI, HashElement } from './HashI';
 
-interface HashI<K, V> {
-    numElements: number;
-    tableSize: number;
-    maxLoadFactor: number;
-    add(key: K, value: V): boolean;
-    remove(key: K): void;
-    getValue(key: K): V;
-}
-
-class Comparable<T> {
-    compareTo: (o: T) => number;
-    equals: (o: T) => number;
-}
-
-class HashElement<K, V> implements Comparable<HashElement<K, V>>{
-    key: K;
-    value: V;
-
-    constructor(key: K, value: V) {
-        this.key = key;
-        this.value = value;
-    }
-
-    compareTo(o: HashElement<K, V>): number {
-        return this.key.toString().localeCompare(o.toString());
-    }
-
-    equals(o: HashElement<K, V>): number {
-        return this.key.toString().localeCompare(o.toString()) === 0 ? 0 : 1;
-    }
-
-    toString(): string {
-        var str: string = `${this.key.toString()}: ${this.value.toString()}`;
-        return str;
-    }
-}
-
-class HashTableC<K, V> implements HashI<K, V>{
+export class HashTableC<K, V> implements HashI<K, V>{
     numElements: number;
     tableSize: number;
     maxLoadFactor: number;
@@ -136,19 +100,3 @@ class HashTableC<K, V> implements HashI<K, V>{
         return str;
     }
 }
-
-
-function print(params: any) {
-    console.log(params.toString())
-}
-
-var h = new HashTableC(10);
-for (let i = 0; i < 100; i++) {
-    h.add(i, i);
-}
-
-h.remove(1);
-// h.add('Adil', 'Akhmetov');
-// h.add('Akzhan', 'Akhmetova');
-// h.remove('Akzhan');
-print(h.tableSize);
