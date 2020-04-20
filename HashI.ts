@@ -8,7 +8,7 @@ export interface HashI<K, V> {
 }
 class Comparable<T> {
     compareTo: (o: T) => number;
-    equals: (o: T) => number;
+    equals: (o: T) => boolean;
 }
 export class HashElement<K, V> implements Comparable<HashElement<K, V>> {
     key: K;
@@ -20,8 +20,8 @@ export class HashElement<K, V> implements Comparable<HashElement<K, V>> {
     compareTo(o: HashElement<K, V>): number {
         return this.key.toString().localeCompare(o.toString());
     }
-    equals(o: HashElement<K, V>): number {
-        return this.key.toString().localeCompare(o.toString()) === 0 ? 0 : 1;
+    equals(o: HashElement<K, V>): boolean {
+        return o.key === this.key && o.value === this.value;
     }
     toString(): string {
         var str: string = `${this.key.toString()}: ${this.value.toString()}`;
