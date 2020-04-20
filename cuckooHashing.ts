@@ -1,184 +1,138 @@
 import { HashI, HashElement } from './HashI';
 import { SHA256, SHA224, SHA384, SHA3, SHA512, RIPEMD160, MD5 } from 'crypto-js';
 
-const hashFunctions = [SHA256, SHA224, SHA384, SHA3, SHA512, RIPEMD160, MD5];
+const hashFunctions = [MD5, MD5, SHA256, SHA224, SHA384, SHA3, SHA512, RIPEMD160];
 
 
 class CuckooHashing<K, V> implements HashI<K, V> {
-    numElements: number;
-    tableSize: number;
-    maxLoadFactor: number;
-    hArray: HashElement<K, V>[];
-    public h1(key: K): BigInt { return 0n; };
-    public h2(key: K): BigInt { return 0n; };
+    numElements: number; // size
+    tableSize: number; // capacity
+    maxLoadFactor: number; //load factor
 
-    private compare(arr1: HashElement<K, V>[], arr2: HashElement<K, V>[]): boolean {
-        if (arr1.length === arr2.length) {
-            for (let i = 0; i < arr1.length; i++) {
-                if ((arr1[i] === undefined && arr2[i] !== undefined) || (arr1[i] !== undefined && arr2[i] === undefined)) {
-                    return false;
-                } else if (arr1[i] !== undefined && arr2[i] !== undefined) {
-                    if (!arr1[i].equals(arr2[i])) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+    k: number; // number of hash function
+    hArray: HashElement<K, V>[][]; // each location (row) can have k spots/cells
+
+    threshold: number; // limit for number of replacement on collision
+
+    constructor(tableSize: number, k: number = 3) {
+        this.tableSize = tableSize;
+        this.k = k % hashFunctions.length;
+        this.numElements = 0;
+        this.hArray = new Array(this.tableSize);
+        for (let i = 0; i < this.hArray.length; i++) {
+            this.hArray[i] = new Array(this.k);
+
         }
-        return false;
+        this.threshold = Math.log(this.tableSize);
+        console.log(this.threshold);
     }
-    // May be a problem with the same hash functions
-    private rehash(h1?: (key: K) => BigInt, h2?: (key: K) => BigInt): void {
-        console.log('Rehashing...');
-        let randomNumber = Math.floor(Math.random() * hashFunctions.length);
-        if (h1 === undefined) {
-            this.h1 = (key: K) => { return BigInt(`0x${hashFunctions[randomNumber](key.toString()).toString()}`) }
-        } else {
-            this.h1 = h1;
-        }
-        if (h2 === undefined) {
-            let randomNumber2 = Math.floor(Math.random() * hashFunctions.length);
-            while (randomNumber2 === randomNumber) {
-                console.log('...');
-                randomNumber2 = Math.floor(Math.random() * hashFunctions.length);
-            }
-            this.h2 = (key: K) => { return BigInt(`0x${hashFunctions[randomNumber2](key.toString()).toString()}`) }
-        } else {
-            this.h2 = h2;
-        }
+
+    indexFor(h: number, length: number): number {
+        return h & (length - 1);
     }
-    private hashValue(key: K, hashFunction: (key: K) => BigInt, tableSize: number): number {
-        let t: BigInt = BigInt(tableSize);
-        let h: BigInt = hashFunction(key);
-        return Number(h.valueOf() % t.valueOf());
+
+    private hashFunction(i: number, key: K): number {
+        // i = (i % this.k) + 1; // possible to delete
+        let hashValue: BigInt = BigInt(hashFunctions[i](key.toString()).toString());
+        let c: BigInt = BigInt('0x7FFFFFFF');
+        return Number(hashValue.valueOf() & c.valueOf());
     }
 
     private loadFactor(): number {
-        return this.numElements / this.maxLoadFactor;
+        return this.numElements / this.tableSize;
     }
-
-    constructor(size: number, loadFactor: number = 1, h1?: (key: K) => BigInt, h2?: (key: K) => BigInt) {
-        this.rehash(h1, h2);
-        this.tableSize = size;
-        this.maxLoadFactor = loadFactor;
-        this.hArray = new Array(this.tableSize);
-    }
-
-    private resize(newSize: number): void {
-        console.log('Resizing...');
-        // performs resizing and rehashing
-        var newArray: HashElement<K, V>[] = new Array(newSize);
-        for (let i = 0; i < this.hArray.length; i++) {
-            if (this.hArray[i] !== undefined) {
-                var ne: HashElement<K, V> = this.hArray[i];
-                var hashValue1: number = this.hashValue(ne.key, this.h1, newSize);
-                if (newArray[hashValue1] !== undefined) {
-                    var hashValue2 = this.hashValue(ne.key, this.h2, newSize);
-                    if (newArray[hashValue2] !== undefined) {
-                        var oldArray: HashElement<K, V>[];
-                        let firstTime = true;
-                        let flag = true;
-                        while (1) {
-                            let prevNe = newArray[hashValue1]; //remember old value
-                            newArray[hashValue1] = ne; //put new
-                            if (firstTime) {
-                                oldArray = newArray;
-                                firstTime = false;
-                                flag = false;
-                            }
-                            hashValue1 = newArray[this.hashValue(prevNe.key, this.h2, newSize)] === undefined ? this.hashValue(prevNe.key, this.h2, newSize) : this.hashValue(prevNe.key, this.h1, newSize); // find second hash of the old value 
-                            if (newArray[hashValue1] !== undefined) {
-                                // check if it is a cycle
-                                if (oldArray === newArray && !flag) {
-                                    console.log('Cycle detected...');
-                                    this.rehash();
-                                    this.resize(newSize);
-                                    hashValue1 = newArray[this.hashValue(prevNe.key, this.h2, newSize)] === undefined ? this.hashValue(prevNe.key, this.h2, newSize) : this.hashValue(prevNe.key, this.h1, newSize);
-                                    console.log('Cycle exterminated!');
-                                }
-                            } else {
-                                newArray[hashValue1] = prevNe; //base case
-                                return;
-                            }
-                            ne = prevNe;
-                        }
-                    } else {
-                        newArray[hashValue2] = ne;
-                    }
-                } else {
-                    newArray[hashValue1] = ne;
-                }
-            }
-        }
-        this.tableSize = newSize;
-        console.log(`Old: ${this.hArray.join(', ')} `);
-        this.hArray = newArray;
-        console.log(`New: ${this.hArray.join(', ')} `);
-        console.log('Resizing completed!');
-    }
-
 
     add(key: K, value: V): boolean {
-        if (this.loadFactor() > this.maxLoadFactor) {
-            this.resize(this.tableSize * 2);
-        }
-        var hashValue1: number = this.hashValue(key, this.h1, this.tableSize);
-        let ne = new HashElement(key, value);
-        console.log(`Add ${ne.toString()} into ${this.hArray.join(', ')}`)
-        if (this.hArray[hashValue1] !== undefined) {
-            var hashValue2: number = this.hashValue(key, this.h2, this.tableSize);
-            if (this.hArray[hashValue2] !== undefined) {
-                const oldArray: HashElement<K, V>[] = this.hArray.slice();
-                let firstTime = true;
-                while (1) {
-                    let prevNe = this.hArray[hashValue1]; //remember old value
-                    this.hArray[hashValue1] = ne; //put new
-                    hashValue1 = this.hArray[this.hashValue(prevNe.key, this.h2, this.tableSize)] === undefined ? this.hashValue(prevNe.key, this.h2, this.tableSize) : this.hashValue(prevNe.key, this.h1, this.tableSize); // find second hash of the old value 
-                    console.log(`Old:${oldArray.join(', ')}; New: ${this.hArray.join(', ')}`)
-                    console.log(this.compare(oldArray, this.hArray));
-                    if (this.hArray[hashValue1] !== undefined) {
-                        // check if it is a cycle
-                        if (this.compare(oldArray, this.hArray) && !firstTime) {
-                            console.log('Cycle detected...');
-                            this.rehash();
-                            this.resize(this.tableSize);
-                            hashValue1 = this.hArray[this.hashValue(prevNe.key, this.h2, this.tableSize)] === undefined ? this.hashValue(prevNe.key, this.h2, this.tableSize) : this.hashValue(prevNe.key, this.h1, this.tableSize);
-                            console.log('Cycle exterminated!');
-                        }
-                    } else {
-                        this.hArray[hashValue1] = prevNe; //base case
-                        return true;
-                    }
-                    if (firstTime) { // providing base case
-                        firstTime = false;
-                    }
-                    ne = prevNe;
+        let loadFactor: number = 0;
+
+        if (this.contains(key, value)) return false;
+
+        let i: number = 1;
+        let cell: number = i - 1;
+        let location: number = this.hashFunction(i, key);
+
+        while (i <= this.k) {
+            cell = i - 1;
+            location = this.hashFunction(i++, key);
+
+            if (this.hArray[location][cell] === undefined) {
+                this.hArray[location][cell] = new HashElement(key, value);
+                this.numElements++;
+                loadFactor = this.loadFactor();
+
+                if (loadFactor > this.maxLoadFactor) {
+                    this.rehash();
                 }
-            } else {
-                this.hArray[hashValue2] = ne;
+
                 return true;
             }
-        } else {
-            this.hArray[hashValue1] = ne;
-            return true;
         }
+
+        i = 1;
+        let count: number = 0;
+        while (count < this.threshold) {
+            count++;
+            cell = i - 1;
+            location = this.hashFunction(i, key);
+
+            if (this.hArray[location][cell] === undefined) {
+                this.hArray[location][cell] = new HashElement(key, value);
+                this.numElements++;
+                loadFactor = this.loadFactor();
+                if (loadFactor > this.maxLoadFactor) {
+                    this.rehash();
+                }
+                return true;
+            } else {
+                let temp: HashElement<K, V> = this.hArray[location][cell];
+                this.hArray[location][cell] = new HashElement(key, value);
+                key = temp.key;
+                value = temp.value;
+            }
+            i = (i == this.k) ? 1 : (i + 1)
+        }
+
+        // possible infinite loop
+        loadFactor = this.loadFactor();
+        if (loadFactor > this.maxLoadFactor) {
+            this.rehash();
+        }
+        return false;
     }
+
+    private rehash() { }
+
+    contains(key: K, value: V): boolean {
+        let i: number = 1;
+        let cell: number = 0;
+        let location: number = this.hashFunction(i, key);
+
+        // add smth
+
+        while (i <= this.k) {
+            cell = i - 1;
+            location = this.hashFunction(i++, key);
+
+            if (this.hArray[location][cell] !== undefined && this.hArray[location][cell].equals(new HashElement(key, value))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     remove(key: K): void {
         throw new Error("Method not implemented.");
     }
     getValue(key: K): V {
         throw new Error("Method not implemented.");
     }
-    toString(): string {
-        return this.hArray.join(', ');
-    }
 }
 
 
 var cH = new CuckooHashing(10);
-for (let i = 0; i < 11; i++) {
-    cH.add(i, i);
-}
-console.log(cH.toString());
+// for (let i = 0; i < 11; i++) {
+//     cH.add(i, i);
+// }
+// console.log(cH.toString());
 // console.log(cH.h1('Hello').toString());
 // console.log(cH.h2('Hello').toString());
