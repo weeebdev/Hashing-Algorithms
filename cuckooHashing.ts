@@ -23,8 +23,8 @@ class CuckooHashing<K, V> implements HashI<K, V> {
             this.hArray[i] = new Array(this.k);
 
         }
-        this.threshold = Math.log(this.tableSize);
-        console.log(this.threshold);
+        this.threshold = Math.floor(Math.log(this.tableSize));
+        // console.log(this.threshold);
     }
 
     indexFor(h: number, length: number): number {
@@ -33,9 +33,9 @@ class CuckooHashing<K, V> implements HashI<K, V> {
 
     private hashFunction(i: number, key: K): number {
         // i = (i % this.k) + 1; // possible to delete
-        let hashValue: BigInt = BigInt(hashFunctions[i](key.toString()).toString());
+        let hashValue: BigInt = BigInt(`0x${hashFunctions[i](key.toString()).toString()}`);
         let c: BigInt = BigInt('0x7FFFFFFF');
-        return Number(hashValue.valueOf() & c.valueOf());
+        return Number(hashValue.valueOf() & c.valueOf()) % this.tableSize;
     }
 
     private loadFactor(): number {
@@ -100,7 +100,32 @@ class CuckooHashing<K, V> implements HashI<K, V> {
         return false;
     }
 
-    private rehash() { }
+    private rehash() {
+        let temp: HashElement<K, V>[][] = this.hArray;
+        this.numElements = 0;
+        this.tableSize *= 2;
+        this.hArray = new Array(this.tableSize);
+        for (let i = 0; i < this.hArray.length; i++) {
+            this.hArray[i] = new Array(this.k);
+        }
+        this.threshold = Math.floor(Math.log(this.tableSize));
+
+        let location: number = 0;
+        let cell: number = 0;
+        let ne: HashElement<K, V> = undefined;
+
+        while (location < temp.length) {
+            cell = 0;
+            while (cell < this.k) {
+                ne = temp[location][cell++];
+                if (ne !== undefined) {
+                    this.add(ne.key, ne.value);
+                }
+            }
+            location++;
+        }
+
+    }
 
     contains(key: K, value: V): boolean {
         let i: number = 1;
@@ -121,18 +146,51 @@ class CuckooHashing<K, V> implements HashI<K, V> {
     }
 
     remove(key: K): void {
-        throw new Error("Method not implemented.");
+        let i: number = 1;
+        let cell: number = 0;
+        let location: number = this.hashFunction(i, key);
+
+        while (i <= this.k) {
+            cell = i - 1;
+            location = this.hashFunction(i++, key);
+
+            if ((this.hArray[location][cell] !== undefined) && (this.hArray[location][cell].equalsKey(key))) {
+                this.hArray[location][cell] = undefined;
+                this.numElements--;
+                // return true;
+            }
+        }
     }
+
+    toString(): string {
+        return this.hArray.join(', ');
+    }
+
     getValue(key: K): V {
-        throw new Error("Method not implemented.");
+        let i: number = 1;
+        let cell: number = 0;
+        let location: number = this.hashFunction(i, key);
+
+        // add smth
+
+        while (i <= this.k) {
+            cell = i - 1;
+            location = this.hashFunction(i++, key);
+
+            if (this.hArray[location][cell] !== undefined && this.hArray[location][cell].equalsKey(key)) {
+                return this.hArray[location][cell].value;
+            }
+        }
+        return undefined;
     }
 }
 
 
 var cH = new CuckooHashing(10);
-// for (let i = 0; i < 11; i++) {
-//     cH.add(i, i);
-// }
-// console.log(cH.toString());
+for (let i = 0; i < 11; i++) {
+    cH.add(i, i);
+}
+console.log(cH.toString());
+console.log(cH.getValue(5));
 // console.log(cH.h1('Hello').toString());
 // console.log(cH.h2('Hello').toString());

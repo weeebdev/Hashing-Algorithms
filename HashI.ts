@@ -23,6 +23,11 @@ export class HashElement<K, V> implements Comparable<HashElement<K, V>> {
     equals(o: HashElement<K, V>): boolean {
         return o.key === this.key && o.value === this.value;
     }
+
+    equalsKey(key: K) {
+        return this.key === key;
+    }
+
     toString(): string {
         var str: string = `${this.key.toString()}: ${this.value.toString()}`;
         return str;
