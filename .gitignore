@@ -1,3 +1,4 @@
 *.js
 !index.js
 node_modules
+homework

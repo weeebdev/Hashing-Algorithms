@@ -157,7 +157,7 @@ class CuckooHashing<K, V> implements HashI<K, V> {
             if ((this.hArray[location][cell] !== undefined) && (this.hArray[location][cell].equalsKey(key))) {
                 this.hArray[location][cell] = undefined;
                 this.numElements--;
-                // return true;
+                return;
             }
         }
     }
