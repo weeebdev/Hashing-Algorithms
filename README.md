@@ -1,3 +1,5 @@
+Unfortunately, GFM does not support Math syntax, so, if it is interesting, you may render it in the platform like [**dillinger.io**](https://dillinger.io/)
+
 **?**
 >add  
 remove  
