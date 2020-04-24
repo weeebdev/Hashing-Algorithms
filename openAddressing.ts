@@ -6,6 +6,8 @@ class HashTableO<K, V> implements HashI<K, V>{
     maxLoadFactor: number;
     hArray: HashElement<K, V>[];
 
+    // index+2^i  DON'T FORGET. IMPLEMENT TOMORROW
+
     constructor(tableSize: number, maxLoadFactor: number = 0.5) {
         this.tableSize = tableSize;
         this.hArray = new Array(this.tableSize);
@@ -14,6 +16,7 @@ class HashTableO<K, V> implements HashI<K, V>{
     }
 
     private rehash() {
+        // console.log('Rehashing')
         let newPrime: number = this.g;
 
         let isPrime = (x) => {
@@ -43,9 +46,10 @@ class HashTableO<K, V> implements HashI<K, V>{
     }
 
     add(key: K, value: V): boolean {
-        if (this.contains(key, value)) {
-            return false;
-        }
+        // console.log({ key }, { value })
+        // if (this.contains(key, value)) {
+        //     return false;
+        // }
 
         if (this.loadFactor() > this.maxLoadFactor) {
             this.resize(this.tableSize * 2);
@@ -53,17 +57,17 @@ class HashTableO<K, V> implements HashI<K, V>{
 
         let hashValue = this.hashValue(key) % this.tableSize;
         if (this.hArray[hashValue] !== undefined) {
-            console.log('OMG! Collision!')
+            // console.log('OMG! Collision!')
             const oldHash = hashValue;
-            let c = 0;
+            let index = 1;
             do {
-                console.log(c++)
-                hashValue = (hashValue * 2) % this.tableSize;
+                hashValue = (hashValue * 2 ** index) % this.tableSize;
                 if (this.hArray[hashValue] === undefined) {
                     this.hArray[hashValue] = new HashElement<K, V>(key, value);
                     this.numElements++;
                     return true;
                 }
+                index++;
             } while (oldHash !== hashValue);
 
         } else {
@@ -71,17 +75,15 @@ class HashTableO<K, V> implements HashI<K, V>{
             this.numElements++;
             return true;
         }
-
         this.rehash();
         this.resize(this.tableSize);
+        return this.add(key, value);
     }
 
     contains(key: K, value?: V): boolean {
-        //  do later after remove method
-
         let hashValue = this.hashValue(key) % this.tableSize;
         const oldHash = hashValue;
-
+        let index = 1;
         do {
             if (this.hArray[hashValue] !== undefined) {
                 if (value === undefined ? this.hArray[hashValue].equalsKey(key) : this.hArray[hashValue].equals(new HashElement<K, V>(key, value))) {
@@ -90,43 +92,54 @@ class HashTableO<K, V> implements HashI<K, V>{
             } else {
                 return false;
             }
-            hashValue = (hashValue * 2) % this.tableSize;
+            hashValue = (hashValue * 2 ** index) % this.tableSize;
+            index++;
 
         } while (oldHash !== hashValue);
     }
 
     resize(tableSize: number) {
-        console.log('Resizing')
+        // console.log('Resizing')
         const temp: HashElement<K, V>[] = this.hArray;
         this.hArray = new Array(tableSize);
         this.numElements = 0;
         this.tableSize = tableSize;
 
         for (let i = 0; i < temp.length; i++) {
-            console.log(i)
+            // console.log(i)
             if (temp[i] !== undefined) {
                 this.add(temp[i].key, temp[i].value);
             }
         }
+        // console.log('Resized')
     }
     remove(key: K): void {
-        if (this.contains(key)) {
+        var k = parseInt(key.toString())
+        if (!this.contains(key)) {
             return;
         }
 
         let hashValue = this.hashValue(key) % this.tableSize;
+        const oldHash = hashValue;
 
-        if (this.hArray[hashValue] !== undefined) {
-            this.hArray[hashValue] = undefined;
-            this.numElements--;
-            this.resize(this.tableSize);
-        }
+        let index = 1;
+        do {
+            if (this.hArray[hashValue].equalsKey(key)) {
+                this.hArray[hashValue] = undefined;
+                this.numElements--;
+                this.resize(this.tableSize);
+                return;
+            }
+            hashValue = (hashValue * 2 ** index++) % this.tableSize;
+
+        } while (oldHash !== hashValue);
 
     }
     getValue(key: K): V {
         let hashValue = this.hashValue(key) % this.tableSize;
         const oldHash = hashValue;
 
+        let index = 1;
         do {
             if (this.hArray[hashValue] !== undefined) {
                 if (this.hArray[hashValue].equalsKey(key)) {
@@ -135,8 +148,8 @@ class HashTableO<K, V> implements HashI<K, V>{
             } else {
                 return undefined;
             }
-            hashValue = (hashValue * 2) % this.tableSize;
-
+            hashValue = (hashValue * 2 ** index) % this.tableSize;
+            index++;
         } while (oldHash !== hashValue);
     }
 
@@ -162,12 +175,26 @@ class HashTableO<K, V> implements HashI<K, V>{
 }
 
 var d = new HashTableO(10);
-d.add('a', 'b');
 
 for (let i = 0; i < 100; i++) {
     d.add(i, i);
 }
 
+var flag = true
+for (let i = 0; i < 100; i++) {
+    flag = flag && d.contains(i);
+}
+
+var flag1 = true
+var arr = []
+for (let i = 0; i < 98; i++) {
+    d.remove(i)
+}
+
+for (let i = 0; i < 98; i++) {
+    flag1 = flag1 && !d.contains(i)
+}
 
 console.log(d.toString());
-console.log(d.contains('c'));
+console.log(flag);
+console.log(flag1);
