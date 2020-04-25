@@ -13,6 +13,18 @@ export class HashTableC<K, V> implements HashI<K, V>{
         this.maxLoadFactor = loadFactor;
         this.numElements = 0;
     }
+    contains(key: K, value: V): boolean {
+        var hashValue: number = (this.hashCode(key) & 0x7FFFFFFF) % this.tableSize;
+
+        if (this.hArray[hashValue] !== undefined) {
+            for (var ne of this.hArray[hashValue].toArray()) {
+                if (ne.equals(new HashElement<K, V>(key, value))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private loadFactor(): number {
         return this.numElements / this.tableSize;
