@@ -5,6 +5,7 @@ export interface HashI<K, V> {
     add(key: K, value: V): boolean;
     remove(key: K): void;
     getValue(key: K): V;
+    contains(key: K, value: V): boolean;
 }
 class Comparable<T> {
     compareTo: (o: T) => number;
