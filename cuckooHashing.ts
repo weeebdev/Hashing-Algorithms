@@ -4,7 +4,7 @@ import { SHA256, SHA224, SHA384, SHA3, SHA512, RIPEMD160, MD5 } from 'crypto-js'
 const hashFunctions = [MD5, MD5, SHA256, SHA224, SHA384, SHA3, SHA512, RIPEMD160];
 
 
-class CuckooHashing<K, V> implements HashI<K, V> {
+export class CuckooHashing<K, V> implements HashI<K, V> {
     numElements: number; // size
     tableSize: number; // capacity
     maxLoadFactor: number; //load factor
@@ -184,13 +184,3 @@ class CuckooHashing<K, V> implements HashI<K, V> {
         return undefined;
     }
 }
-
-
-var cH = new CuckooHashing(10);
-for (let i = 0; i < 11; i++) {
-    cH.add(i, i);
-}
-console.log(cH.toString());
-console.log(cH.getValue(5));
-// console.log(cH.h1('Hello').toString());
-// console.log(cH.h2('Hello').toString());

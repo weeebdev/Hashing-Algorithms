@@ -1,5 +1,5 @@
 import { HashElement, HashI } from './HashI'
-class HashTableO<K, V> implements HashI<K, V>{
+export class HashTableO<K, V> implements HashI<K, V>{
     private g = 31;
     numElements: number;
     tableSize: number;
@@ -173,28 +173,3 @@ class HashTableO<K, V> implements HashI<K, V>{
         return this.hArray.join(', ');
     }
 }
-
-var d = new HashTableO(10);
-
-for (let i = 0; i < 100; i++) {
-    d.add(i, i);
-}
-
-var flag = true
-for (let i = 0; i < 100; i++) {
-    flag = flag && d.contains(i);
-}
-
-var flag1 = true
-var arr = []
-for (let i = 0; i < 98; i++) {
-    d.remove(i)
-}
-
-for (let i = 0; i < 98; i++) {
-    flag1 = flag1 && !d.contains(i)
-}
-
-console.log(d.toString());
-console.log(flag);
-console.log(flag1);
