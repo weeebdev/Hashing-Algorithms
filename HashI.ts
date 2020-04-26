@@ -2,10 +2,12 @@ export interface HashI<K, V> {
     numElements: number;
     tableSize: number;
     maxLoadFactor: number;
+    numOfCollisions: number;
     add(key: K, value: V): boolean;
     remove(key: K): void;
     getValue(key: K): V;
     contains(key: K, value: V): boolean;
+    getNumOfCollisions(): number;
 }
 class Comparable<T> {
     compareTo: (o: T) => number;

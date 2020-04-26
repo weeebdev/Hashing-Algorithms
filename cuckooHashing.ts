@@ -14,6 +14,12 @@ export class CuckooHashing<K, V> implements HashI<K, V> {
 
     threshold: number; // limit for number of replacement on collision
 
+    numOfCollisions: number;
+
+    getNumOfCollisions(): number {
+        return this.numOfCollisions;
+    }
+
     constructor(tableSize: number, k: number = 3) {
         this.tableSize = tableSize;
         this.k = k % hashFunctions.length;
@@ -24,7 +30,7 @@ export class CuckooHashing<K, V> implements HashI<K, V> {
 
         }
         this.threshold = Math.floor(Math.log(this.tableSize));
-        // console.log(this.threshold);
+        this.numOfCollisions = 0;
     }
 
     indexFor(h: number, length: number): number {
@@ -66,6 +72,8 @@ export class CuckooHashing<K, V> implements HashI<K, V> {
 
                 return true;
             }
+
+            this.numOfCollisions++;
         }
 
         i = 1;
@@ -90,6 +98,7 @@ export class CuckooHashing<K, V> implements HashI<K, V> {
                 value = temp.value;
             }
             i = (i == this.k) ? 1 : (i + 1)
+            this.numOfCollisions++;
         }
 
         // possible infinite loop
@@ -184,3 +193,20 @@ export class CuckooHashing<K, V> implements HashI<K, V> {
         return undefined;
     }
 }
+
+
+// function generate(n: number): number[] {
+//     return Array.from({ length: n }, () => Math.floor(Math.random() * n));;
+// }
+
+// let n = 50;
+
+// let arr = generate(n);
+
+// let cH = new CuckooHashing(n);
+
+// for (let i of arr) {
+//     cH.add(i, i);
+// }
+
+// console.log(cH.toString());

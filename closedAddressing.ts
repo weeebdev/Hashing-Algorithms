@@ -6,12 +6,18 @@ export class HashTableC<K, V> implements HashI<K, V>{
     tableSize: number;
     maxLoadFactor: number;
     hArray: LinkedList<HashElement<K, V>>[];
+    numOfCollisions: number;
+
+    getNumOfCollisions(): number {
+        return this.numOfCollisions;
+    }
 
     constructor(size: number, loadFactor: number = 1) {
         this.tableSize = size;
         this.hArray = new Array(this.tableSize);
         this.maxLoadFactor = loadFactor;
         this.numElements = 0;
+        this.numOfCollisions = 0;
     }
     contains(key: K, value: V): boolean {
         var hashValue: number = (this.hashCode(key) & 0x7FFFFFFF) % this.tableSize;
@@ -72,6 +78,8 @@ export class HashTableC<K, V> implements HashI<K, V>{
         if (this.hArray[hashValue] === undefined) {
 
             this.hArray[hashValue] = new LinkedList();
+        } else {
+            this.numOfCollisions++;
         }
         this.hArray[hashValue].append(ne);
         this.numElements++;
@@ -112,3 +120,19 @@ export class HashTableC<K, V> implements HashI<K, V>{
         return str;
     }
 }
+
+// function generate(n: number): number[] {
+//     return Array.from({ length: n }, () => Math.floor(Math.random() * n));;
+// }
+
+// let n = 50;
+
+// let arr = generate(n);
+
+// let cH = new HashTableC(n);
+
+// for (let i of arr) {
+//     cH.add(i, i);
+// }
+
+// console.log(cH.toString());
