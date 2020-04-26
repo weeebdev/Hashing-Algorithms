@@ -179,23 +179,3 @@ export class HashTableO<K, V> implements HashI<K, V>{
         return this.hArray.join(', ');
     }
 }
-
-// function generate(n: number): number[] {
-//     return Array.from({ length: n }, () => Math.floor(Math.random() * n));;
-// }
-
-// let n = 50;
-
-// let arr = generate(n);
-
-// let cH = new HashTableO(n);
-
-// for (let i of arr) {
-//     cH.add(i, i);
-// }
-
-// for (let i of arr) {
-//     console.log(`${i}: ${cH.contains(i)}`)
-// }
-
-// console.log(cH.toString());

@@ -76,11 +76,11 @@ function test(n) {
             z: cuckooRes,
             type: 'surface'
         };
-        let data = [trace1,
-            trace2,
-            trace3,
-            trace4];
-        Plotly.newPlot(defaultDiv, data);
+        // let data = [trace1, trace2, trace3, trace4];
+        Plotly.newPlot(defaultDiv, [trace1]);
+        Plotly.newPlot(openAddressingDiv, [trace2]);
+        Plotly.newPlot(closedAddressingDiv, [trace3]);
+        Plotly.newPlot(cuckooHashingDiv, [trace4]);
     }
 }
 test(50);

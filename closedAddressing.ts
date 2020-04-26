@@ -120,19 +120,3 @@ export class HashTableC<K, V> implements HashI<K, V>{
         return str;
     }
 }
-
-// function generate(n: number): number[] {
-//     return Array.from({ length: n }, () => Math.floor(Math.random() * n));;
-// }
-
-// let n = 50;
-
-// let arr = generate(n);
-
-// let cH = new HashTableC(n);
-
-// for (let i of arr) {
-//     cH.add(i, i);
-// }
-
-// console.log(cH.toString());
