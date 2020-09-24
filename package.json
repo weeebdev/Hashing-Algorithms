@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "crypto-js": "^4.0.0",
-    "plotly.js-dist": "^1.54.7"
+    "plotly.js-dist": "^1.55.0"
   }
 }
